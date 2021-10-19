@@ -128,3 +128,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _targetSprite: {fileID: 8585053224780625444}
   _targetOffset: 0.05
+  _layersToConsider:
+    serializedVersion: 2
+    m_Bits: 19
+  _cannonballTemplate: {fileID: 1817257952206760470, guid: cc51d7ce30b508845b7b74f8b14fbbc0, type: 3}
+  _fireForce: 20

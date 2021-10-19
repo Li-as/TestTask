@@ -6,13 +6,16 @@ public class Cannon : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _targetSprite;
     [SerializeField] private float _targetOffset;
-
+    [SerializeField] private LayerMask _layersToConsider;
+    [SerializeField] private Cannonball _cannonballTemplate;
+    [SerializeField] private float _fireForce;
+    
     private void Update()
     {
         if (Input.GetMouseButton(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hitInfo))
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, _layersToConsider))
             {
                 _targetSprite.gameObject.SetActive(true);
                 PlaceTargetAt(hitInfo.point, hitInfo.normal);
@@ -26,7 +29,7 @@ public class Cannon : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             _targetSprite.gameObject.SetActive(false);
-            Fire();
+            Fire(_targetSprite.transform.position);
         }
     }
 
@@ -42,8 +45,10 @@ public class Cannon : MonoBehaviour
         _targetSprite.transform.position = targetPosition;
     }
 
-    private void Fire()
+    private void Fire(Vector3 targetPosition)
     {
-        Debug.Log("Fire!");
+        Cannonball ball = Instantiate(_cannonballTemplate, Camera.main.transform.position, Quaternion.identity);
+        Vector3 fireForce = (targetPosition - ball.transform.position).normalized * _fireForce;
+        ball.Rigidbody.AddForce(fireForce, ForceMode.Impulse);
     }
 }
