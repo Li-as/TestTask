@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Cannon : MonoBehaviour
 {
@@ -9,27 +10,34 @@ public class Cannon : MonoBehaviour
     [SerializeField] private LayerMask _layersToConsider;
     [SerializeField] private Cannonball _cannonballTemplate;
     [SerializeField] private float _fireForce;
+    [SerializeField] private LevelResetter _levelResetter;
     
     private void Update()
     {
-        if (Input.GetMouseButton(0))
+        if (_levelResetter.IsResetting == false)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, _layersToConsider))
+            if (EventSystem.current.IsPointerOverGameObject() == false)
             {
-                _targetSprite.gameObject.SetActive(true);
-                PlaceTargetAt(hitInfo.point, hitInfo.normal);
-            }
-            else
-            {
-                _targetSprite.gameObject.SetActive(false);
-            }
-        }    
+                if (Input.GetMouseButton(0))
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, _layersToConsider))
+                    {
+                        _targetSprite.gameObject.SetActive(true);
+                        PlaceTargetAt(hitInfo.point, hitInfo.normal);
+                    }
+                    else
+                    {
+                        _targetSprite.gameObject.SetActive(false);
+                    }
+                }
 
-        if (Input.GetMouseButtonUp(0))
-        {
-            _targetSprite.gameObject.SetActive(false);
-            Fire(_targetSprite.transform.position);
+                if (Input.GetMouseButtonUp(0))
+                {
+                    _targetSprite.gameObject.SetActive(false);
+                    Fire(_targetSprite.transform.position);
+                }
+            }
         }
     }
 
@@ -48,6 +56,7 @@ public class Cannon : MonoBehaviour
     private void Fire(Vector3 targetPosition)
     {
         Cannonball ball = Instantiate(_cannonballTemplate, Camera.main.transform.position, Quaternion.identity);
+        ball.Init(_levelResetter);
         Vector3 fireForce = (targetPosition - ball.transform.position).normalized * _fireForce;
         ball.Rigidbody.AddForce(fireForce, ForceMode.Impulse);
     }
